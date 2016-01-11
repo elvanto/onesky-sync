@@ -23,7 +23,7 @@ class sync(object):
         self.langs = self.get_languages()
         if self.filepath[-1] == "/":
             self.filepath = self.filepath[:-1]
-        self.langpath = self.filepath + "/po_files"
+        self.langpath = self.filepath + "/po"
         self.keep = keep
         self.rename = rename
 
@@ -49,17 +49,9 @@ class sync(object):
         for lang in data["data"]:
             langs.append(lang["code"])
         if self.exclude:
-            if type(self.exclude) == str:
-                try:
-                    langs.remove(self.exclude)
-                except Exception:
-                    pass
-            elif type(self.exclude) == list:
-                for lang in self.exclude:
-                    try:
-                        self.langs.remove(lang)
-                    except Exception:
-                        pass
+            for lang in self.exclude:
+                langs.remove(lang)
+
         return langs
 
     def download_files(self):
@@ -74,7 +66,7 @@ class sync(object):
 
         url = "https://platform.api.onesky.io/1/projects/{}/translations".format(self.project)
         for lang in self.langs:
-            print("Downloading {}. {} of {}".format(lang, self.langs.index(lang) + 1, len(self.langs) + 1))
+            print("Downloading {}. {} of {}".format(lang, self.langs.index(lang) + 1, len(self.langs)))
             auth = self.authentication_details()
             params = {
                 "source_file_name":"{}.po".format(self.base),
@@ -84,11 +76,12 @@ class sync(object):
             for key in auth.keys():
                 params[key] = auth[key]
 
-            data=requests.get(url, params=params).content.decode()
-            po_path = "{}/{}.po".format(self.langpath, lang)
+            data = requests.get(url, params=params).content.decode()
             if self.rename:
+                po_path = "{}/{}.po".format(self.langpath, lang.replace("-", "_"))
                 mo_path = "{}/{}.mo".format(self.filepath, lang.replace("-","_"))
             else:
+                po_path = "{}/{}.po".format(self.langpath, lang)
                 mo_path = "{}/{}.mo".format(self.filepath, lang)
             with open(po_path, "w+") as file:
                 file.write(data)
@@ -96,7 +89,7 @@ class sync(object):
             po = polib.pofile(po_path)
             print("{}.po downloaded and saved to {}, converting to MO".format(lang, po_path))
             po.save_as_mofile(mo_path)
-            print("{}.mo converted and saved to []".format(lang, mo_path))
+            print("{}.mo converted and saved to {}".format(lang, mo_path))
         if not self.keep:
             print("Deleing PO files")
             shutil.rmtree(self.langpath)
@@ -104,6 +97,9 @@ class sync(object):
         return
 
 if __name__ == "__main__":
+    """
+
+    """
     print("Starting up!")
     # Set some defaults, prevent errors
     exclude = []
@@ -138,6 +134,32 @@ if __name__ == "__main__":
         elif opt == "--rename":
             rename = arg
 
+    # TODO: Get Auth details from auth.txt
+    """
+    try:
+        with open("auth.txt") as file:
+            reader = file.readlines()
+            api_key = reader[0]
+            api_secret = reader[1]
+    except IOError:
+        api_key = input("Please enter API Key: ")
+        api_secret = input("Please enter API Secret: ")
+        with open("auth.txt", "w+") as file:
+            file.writelines([api_key, api_secret])
+    """
+
+    # TODO: Use 2 way encryption on the auth details
+    """
+    https://gist.github.com/sekondus/4322469#gistcomment-1314672
+    Crypto library?
+    https://www.dlitz.net/software/pycrypto/
+    """
+
+    # Error if no project ID given
+    if not project_id:
+        print("Please specify a project id using --project=project_id")
+        sys.exit(2)
+
     tool = sync(api_key,
                 api_secret,
                 file_path,
@@ -147,4 +169,3 @@ if __name__ == "__main__":
                 keep=keep,
                 rename=rename)
     tool.download_files()
-
