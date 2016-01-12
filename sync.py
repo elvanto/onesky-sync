@@ -59,7 +59,10 @@ class sync(object):
             langs.append(lang["code"])
         if self.exclude:
             for lang in self.exclude:
-                langs.remove(lang)
+                try:
+                    langs.remove(lang)
+                except ValueError:
+                    pass
 
         return langs
 
