@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 ### Downloading the .PO Files
 
 ```
-python3 sync.py api_key api_secret --project=project_id
+python3 sync.py --project=project_id
 ```
 
 This will then download all the PO files and convert to MO for the specified project.

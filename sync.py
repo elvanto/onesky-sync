@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import codecs
 import getopt
 import hashlib
 import os
@@ -7,6 +8,14 @@ import requests
 import shutil
 import sys
 import time
+
+
+def base_encode(string):
+    return codecs.encode(string.encode(), "base-64").decode()
+
+
+def base_decode(string):
+    return codecs.decode(string.encode(), "base-64").decode()
 
 
 class sync(object):
@@ -97,9 +106,6 @@ class sync(object):
         return
 
 if __name__ == "__main__":
-    """
-
-    """
     print("Starting up!")
     # Set some defaults, prevent errors
     exclude = []
@@ -108,13 +114,11 @@ if __name__ == "__main__":
     keep = False
     rename = False
     try:
-        opts, args = getopt.getopt(sys.argv[3:], "", ["path=", "project=", "exclude=", "keep=", "base=", "rename="])
-        api_key = sys.argv[1]
-        api_secret = sys.argv[2]
+        opts, args = getopt.getopt(sys.argv[1:], "", ["path=", "project=", "exclude=", "keep=", "base=", "rename="])
     except getopt.GetoptError:
         print(getopt.GetoptError)
-        print("Usage: python sync.py api_key api_secret --project=project_id [--path=<dir> --exclude=lang_code --base= --keep=False --rename=True")
-        print("E.G. python sync.py public_key secret_key --project=1234 --path=~/Desktop/language_files --exclude=en-US, --base=en_US")
+        print("Usage: python sync.py --project=project_id [--path=<dir> --exclude=lang_code --base= --keep=False --rename=True")
+        print("E.G. python sync.py --project=1234 --path=~/Desktop/language_files --exclude=en-US, --base=en_US")
         sys.exit(2)
 
 
@@ -134,26 +138,16 @@ if __name__ == "__main__":
         elif opt == "--rename":
             rename = arg
 
-    # TODO: Get Auth details from auth.txt
-    """
     try:
         with open("auth.txt") as file:
             reader = file.readlines()
-            api_key = reader[0]
-            api_secret = reader[1]
+            api_key = base_decode(reader[0])
+            api_secret = base_decode(reader[1])
     except IOError:
         api_key = input("Please enter API Key: ")
         api_secret = input("Please enter API Secret: ")
         with open("auth.txt", "w+") as file:
-            file.writelines([api_key, api_secret])
-    """
-
-    # TODO: Use 2 way encryption on the auth details
-    """
-    https://gist.github.com/sekondus/4322469#gistcomment-1314672
-    Crypto library?
-    https://www.dlitz.net/software/pycrypto/
-    """
+            file.writelines([base_encode(api_key), base_encode(api_secret)])
 
     # Error if no project ID given
     if not project_id:
