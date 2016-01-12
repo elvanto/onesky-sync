@@ -106,7 +106,7 @@ class sync(object):
         return
 
 if __name__ == "__main__":
-    print("Starting up!")
+    print("Starting up")
     # Set some defaults, prevent errors
     exclude = []
     file_path = "language_files"
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     if not project_id:
         print("Please specify a project id using --project=project_id")
         sys.exit(2)
-
+    print("Initializing")
     tool = sync(api_key,
                 api_secret,
                 file_path,
@@ -162,4 +162,6 @@ if __name__ == "__main__":
                 exclude=exclude,
                 keep=keep,
                 rename=rename)
+    print("Downloading files")
     tool.download_files()
+    print("Language files downloaded. Quitting app")
