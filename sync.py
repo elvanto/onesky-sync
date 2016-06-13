@@ -179,9 +179,9 @@ if __name__ == "__main__":
     print("Downloading files")
     threads = []
     for lang in tool.langs:
-        threads.append(downloader(lang, tool))
-    for thread in threads:
+        thread = downloader(lang, tool)
         thread.start()
+        threads.append(thread)
 
     for thread in threads:
         thread.join()
