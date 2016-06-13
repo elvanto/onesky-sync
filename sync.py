@@ -7,6 +7,7 @@ import polib
 import requests
 import shutil
 import sys
+import threading
 import time
 
 
@@ -66,45 +67,55 @@ class sync(object):
 
         return langs
 
-    def download_files(self):
-        """
-        Downloads the .PO file of the specified language/project and saves to the chosen filepath before converting to mo
-        If set not to keep, it deletes the files.
-        :lang: Language code
-        :return: None
-        """
-        if not os.path.exists(self.langpath):
-            os.makedirs(self.langpath)
 
-        url = "https://platform.api.onesky.io/1/projects/{}/translations".format(self.project)
-        for lang in self.langs:
-            print("Downloading {}. {} of {}".format(lang, self.langs.index(lang) + 1, len(self.langs)))
-            auth = self.authentication_details()
-            params = {
-                "source_file_name":"{}.po".format(self.base),
-                "locale": lang,
-                "export_file_name": "{}.po".format(lang)
-            }
-            for key in auth.keys():
-                params[key] = auth[key]
+class downloader(threading.Thread):
+    """
+    Thread Class to perform the downloads
+    Downloads the .PO file of the specified language/project and saves to the chosen filepath before converting to mo
+    If set not to keep, it deletes the files.
+    :lang: Language code
+    :return: None
+    """
 
-            data = requests.get(url, params=params).content.decode()
-            if self.rename:
-                po_path = "{}/{}.po".format(self.langpath, lang.replace("-", "_"))
-                mo_path = "{}/{}.mo".format(self.filepath, lang.replace("-","_"))
-            else:
-                po_path = "{}/{}.po".format(self.langpath, lang)
-                mo_path = "{}/{}.mo".format(self.filepath, lang)
-            with open(po_path, "w+") as file:
-                file.write(data)
+    def __init__(self, lang, sync):
+        threading.Thread.__init__(self)
+        self.sync = sync
+        self.lang = lang
 
-            po = polib.pofile(po_path)
-            print("{}.po downloaded and saved to {}, converting to MO".format(lang, po_path))
-            po.save_as_mofile(mo_path)
-            print("{}.mo converted and saved to {}".format(lang, mo_path))
-        if not self.keep:
+    def run(self):
+        if not os.path.exists(self.sync.langpath):
+            os.makedirs(self.sync.langpath)
+
+        url = "https://platform.api.onesky.io/1/projects/{}/translations".format(self.sync.project)
+
+        auth = self.sync.authentication_details()
+        params = {
+            "source_file_name":"{}.po".format(self.sync.base),
+            "locale": lang,
+            "export_file_name": "{}.po".format(self.lang)
+        }
+        for key in auth.keys():
+            params[key] = auth[key]
+
+        data = requests.get(url, params=params).content.decode()
+
+        if self.sync.rename:
+            po_path = "{}/{}.po".format(self.sync.langpath, self.lang.replace("-", "_"))
+            mo_path = "{}/{}.mo".format(self.sync.filepath, self.lang.replace("-","_"))
+        else:
+            po_path = "{}/{}.po".format(self.sync.langpath, self.lang)
+            mo_path = "{}/{}.mo".format(self.sync.filepath, self.lang)
+        with open(po_path, "w+") as file:
+            file.write(data)
+
+        po = polib.pofile(po_path)
+        print("{}.po downloaded and saved to {}, converting to MO".format(self.lang, po_path))
+        po.save_as_mofile(mo_path)
+        print("{}.mo converted and saved to {}".format(self.lang, mo_path))
+
+        if not self.sync.keep:
             print("Deleing PO files")
-            shutil.rmtree(self.langpath)
+            shutil.rmtree(self.sync.langpath)
 
         return
 
@@ -166,5 +177,14 @@ if __name__ == "__main__":
                 keep=keep,
                 rename=rename)
     print("Downloading files")
-    tool.download_files()
+    threads = []
+    for lang in tool.langs:
+        threads.append(downloader(lang, tool))
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
     print("Language files downloaded. Quitting app")
+    sys.exit()
