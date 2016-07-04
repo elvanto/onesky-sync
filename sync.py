@@ -179,7 +179,6 @@ if __name__ == "__main__":
                 rename=rename)
     print("Downloading files")
     threads = []
-    print(tool.langs)
     for lang in tool.langs:
         thread = downloader(lang, tool)
         thread.start()
