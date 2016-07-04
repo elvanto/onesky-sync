@@ -105,11 +105,13 @@ class downloader(threading.Thread):
         else:
             po_path = "{}/{}.po".format(self.sync.langpath, self.lang)
             mo_path = "{}/{}.mo".format(self.sync.filepath, self.lang)
-        with open(po_path, "w+") as file:
-            file.write(data)
+
+        with open(po_path, "w+") as po_file:
+            po_file.write(data)
 
         po = polib.pofile(po_path)
         print("{}.po downloaded and saved to {}, converting to MO".format(self.lang, po_path))
+
         po.save_as_mofile(mo_path)
         print("{}.mo converted and saved to {}".format(self.lang, mo_path))
 
@@ -134,7 +136,6 @@ if __name__ == "__main__":
         print("Usage: python sync.py --project=project_id [--path=<dir> --exclude=lang_code --base= --keep=False --rename=True")
         print("E.G. python sync.py --project=1234 --path=~/Desktop/language_files --exclude=en-US, --base=en_US")
         sys.exit(2)
-
 
     for opt, arg in opts:
         if opt == "--project":
@@ -178,10 +179,12 @@ if __name__ == "__main__":
                 rename=rename)
     print("Downloading files")
     threads = []
+    print(tool.langs)
     for lang in tool.langs:
         thread = downloader(lang, tool)
         thread.start()
         threads.append(thread)
+        time.sleep(0.5)
 
     for thread in threads:
         thread.join()

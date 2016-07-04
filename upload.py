@@ -51,14 +51,9 @@ class Uploader(object):
         payload["is_keeping_all_strings"] = self.keep
         payload["is_keeping_all_strings"] = "false"
 
-        """res = {
-            "url": url,
-            "file": file_path,
-            "params": payload
-        }"""
         print("Data compiled... uploading!")
         res = requests.post(url, files=files, params=payload)
-        if res['meta']['status'] == 201:
+        if res.json()['meta']['status'] == 201:
             print("Succesfully uploaded!")
         else:
             print("Something went wrong...")
@@ -72,7 +67,7 @@ if __name__ == "__main__":
     # Set some defaults, prevent errors
     exclude = []
     file_path = "language_files"
-    base = "en-US"
+    base = "en_US"
     keep = "false"
     file_type = "GNU_PO"
 
