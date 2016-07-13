@@ -51,7 +51,7 @@ EG: `--exclude=en-UK --exclude=ne-BL` will not download the en-UK or ne-BL langu
 ### Uploading .PO Files
 
 ```
-python3 upload.py --project=project_id --file_path=/path/to/file.po
+python3 upload.py --project=project_id --path=/path/to/file.po
 ```
 
 This will upload the specified PO file to your project. Onesky will then process the file as-per-normal
