@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import codecs
 import getopt
-import hashlib
 import os
 import polib
 import requests
@@ -9,6 +8,8 @@ import shutil
 import sys
 import threading
 import time
+
+from authentication import authentication_details
 
 
 def base_encode(string):
@@ -37,24 +38,13 @@ class sync(object):
         self.keep = keep
         self.rename = rename
 
-    def authentication_details(self):
-        """
-        Generates the messed up Authentication details that onesky uses
-        :return: Dict
-        """
-        ts = str(int(time.time()))
-        dev_hash = hashlib.md5()
-        dev_hash.update(ts.encode())
-        dev_hash.update(self.api_secret.encode())
-        return {"api_key":self.api_key,"timestamp":ts,"dev_hash":dev_hash.hexdigest()}
-
     def get_languages(self):
         """
         Gets the list of the languages for the specified project
         :return: List
         """
         url = "https://platform.api.onesky.io/1/projects/{}/languages".format(self.project)
-        data = requests.get(url, params=self.authentication_details()).json()
+        data = requests.get(url, params=authentication_details(self.api_key, self.api_secret)).json()
         langs = []
         for lang in data["data"]:
             langs.append(lang["code"])
@@ -88,7 +78,7 @@ class downloader(threading.Thread):
 
         url = "https://platform.api.onesky.io/1/projects/{}/translations".format(self.sync.project)
 
-        auth = self.sync.authentication_details()
+        auth = authentication_details(self.sync.api_key, self.sync.api_secret)
         params = {
             "source_file_name":"{}.po".format(self.sync.base),
             "locale": lang,
@@ -129,6 +119,8 @@ if __name__ == "__main__":
     base = "en_US"
     keep = False
     rename = False
+    project_id = ''
+
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", ["path=", "project=", "exclude=", "keep=", "base=", "rename="])
     except getopt.GetoptError:

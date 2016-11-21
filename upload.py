@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import codecs
 import getopt
-import hashlib
+import json
 import os
 import requests
 import sys
-import time
 
-import json
+from authentication import authentication_details
 
 def base_encode(string):
     return codecs.encode(string.encode(), "base-64").decode()
@@ -30,36 +29,30 @@ class Uploader(object):
         self.keep = keep
         self.file_type = file_type
 
-    def authentication_details(self):
-        """
-        Generates the Authentication details that onesky uses
-        :return: Dict
-        """
-        ts = str(int(time.time()))
-        dev_hash = hashlib.md5()
-        dev_hash.update(ts.encode())
-        dev_hash.update(self.api_secret.encode())
-        return {"api_key":self.api_key,"timestamp":ts,"dev_hash":dev_hash.hexdigest()}
-
     def upload(self):
         print("Compiling data to upload")
         url = "https://platform.api.onesky.io/1/projects/{0}/files".format(self.project)
-        files = {'file': open(file_path, 'rb')}
-        payload = self.authentication_details()
-        payload['file_format'] = self.file_type
-        payload['locale'] = base
-        payload["is_keeping_all_strings"] = self.keep
-        payload["is_keeping_all_strings"] = "false"
+        print("Attempting to upload file located at {0}".format(file_path))
+        try:
+            files = {'file': open(file_path, 'rb')}
+            payload = authentication_details(api_key, api_secret)
+            payload['file_format'] = self.file_type
+            payload['locale'] = base
+            payload["is_keeping_all_strings"] = self.keep
+            payload["is_keeping_all_strings"] = "false"
 
-        print("Data compiled... uploading!")
-        res = requests.post(url, files=files, params=payload)
-        if res.json()['meta']['status'] == 201:
-            print("Succesfully uploaded!")
-        else:
-            print("Something went wrong...")
-            print(json.dumps(res.json(), indent=4))
+            print("Data compiled... uploading!")
+            res = requests.post(url, files=files, params=payload)
+            if res.json()['meta']['status'] == 201:
+                print("Succesfully uploaded!")
+            else:
+                print("Something went wrong...")
+                print(json.dumps(res.json(), indent=4))
 
-        return
+            return
+        except FileNotFoundError:
+            print("No file located at {0} - Please give a valid file path".format(file_path))
+            sys.exit(2)
 
 
 if __name__ == "__main__":
@@ -70,6 +63,7 @@ if __name__ == "__main__":
     base = "en_US"
     keep = "false"
     file_type = "GNU_PO"
+    project_id = ''
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", ["path=", "project=", "format=", "keep=", "base="])
