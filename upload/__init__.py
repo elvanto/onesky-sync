@@ -8,6 +8,7 @@ import sys
 
 from authentication import authentication_details
 
+
 def base_encode(string):
     return codecs.encode(string.encode(), "base-64").decode()
 
