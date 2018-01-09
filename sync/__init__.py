@@ -58,7 +58,7 @@ class sync(object):
         return langs
 
 
-class downloader(threading.Thread):
+class Downloader(threading.Thread):
     """
     Thread Class to perform the downloads
     Downloads the .PO file of the specified language/project and saves to the chosen filepath before converting to mo
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     print("Downloading files")
     threads = []
     for lang in tool.langs:
-        thread = downloader(lang, tool)
+        thread = Downloader(lang, tool)
         thread.start()
         threads.append(thread)
         time.sleep(0.5)
