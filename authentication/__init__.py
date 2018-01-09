@@ -1,5 +1,6 @@
-import time
+import codecs
 import hashlib
+import time
 
 
 def authentication_details(api_key, api_secret):
@@ -16,3 +17,9 @@ def authentication_details(api_key, api_secret):
     dev_hash.update(api_secret.encode())
     return {"api_key": api_key, "timestamp": ts, "dev_hash": dev_hash.hexdigest()}
 
+def base_encode(string):
+    return codecs.encode(string.encode(), "base-64").decode()
+
+
+def base_decode(string):
+    return codecs.decode(string.encode(), "base-64").decode()

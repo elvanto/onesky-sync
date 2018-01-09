@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import codecs
 import getopt
 import os
 import polib
@@ -10,14 +9,6 @@ import threading
 import time
 
 from authentication import authentication_details
-
-
-def base_encode(string):
-    return codecs.encode(string.encode(), "base-64").decode()
-
-
-def base_decode(string):
-    return codecs.decode(string.encode(), "base-64").decode()
 
 
 class sync(object):

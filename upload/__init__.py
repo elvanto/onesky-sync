@@ -1,20 +1,11 @@
 #!/usr/bin/env python3
-import codecs
 import getopt
 import json
 import os
 import requests
 import sys
 
-from authentication import authentication_details
-
-
-def base_encode(string):
-    return codecs.encode(string.encode(), "base-64").decode()
-
-
-def base_decode(string):
-    return codecs.decode(string.encode(), "base-64").decode()
+from authentication import authentication_details, base_encode, base_decode
 
 
 class Uploader(object):
@@ -59,7 +50,6 @@ class Uploader(object):
 if __name__ == "__main__":
     print("Starting up")
     # Set some defaults, prevent errors
-    exclude = []
     file_path = "language_files"
     base = "en_US"
     keep = "false"
