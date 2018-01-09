@@ -1,3 +1,7 @@
 auth.txt
 .idea/
 *.pyc
+venv/
+build/
+dist/
+OneSky_Sync.egg-info/

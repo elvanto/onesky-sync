@@ -8,10 +8,10 @@ import sys
 import threading
 import time
 
-from authentication import authentication_details
+from onesky_sync.authentication import authentication_details, base_decode, base_encode
 
 
-class sync(object):
+class Sync(object):
     """
     The object to store important stuff.
     """
@@ -72,7 +72,7 @@ class Downloader(threading.Thread):
         auth = authentication_details(self.sync.api_key, self.sync.api_secret)
         params = {
             "source_file_name":"{}.po".format(self.sync.base),
-            "locale": lang,
+            "locale": self.lang,
             "export_file_name": "{}.po".format(self.lang)
         }
         for key in auth.keys():
@@ -91,19 +91,20 @@ class Downloader(threading.Thread):
             po_file.write(data)
 
         po = polib.pofile(po_path)
-        print("{}.po downloaded and saved to {}, converting to MO".format(self.lang, po_path))
+        sys.stdout.write("{}.po downloaded and saved to {}, converting to MO".format(self.lang, po_path))
 
         po.save_as_mofile(mo_path)
-        print("{}.mo converted and saved to {}".format(self.lang, mo_path))
+        sys.stdout.write("{}.mo converted and saved to {}".format(self.lang, mo_path))
 
         if not self.sync.keep:
-            print("Deleing PO files")
+            sys.stdout.write("Deleing PO files")
             shutil.rmtree(self.sync.langpath)
 
         return
 
-if __name__ == "__main__":
-    print("Starting up")
+
+def main(parameters):
+    sys.stdout.write("Downloading Files from OneSky\n")
     # Set some defaults, prevent errors
     exclude = []
     file_path = "language_files"
@@ -113,13 +114,13 @@ if __name__ == "__main__":
     project_id = ''
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["path=", "project=", "exclude=", "keep=", "base=", "rename="])
+        opts, args = getopt.getopt(parameters, "", ["path=", "project=", "exclude=", "keep=", "base=", "rename="])
     except getopt.GetoptError:
-        print(getopt.GetoptError)
-        print("Usage: python sync.py --project=project_id [--path=<dir> --exclude=lang_code --base= --keep=False --rename=True")
-        print("E.G. python sync.py --project=1234 --path=~/Desktop/language_files --exclude=en-US, --base=en_US")
+        sys.stdout.write(getopt.GetoptError)
+        sys.stdout.write("Usage: python sync.py --project=project_id [--path=<dir> --exclude=lang_code --base= --keep=False --rename=True\n")
+        sys.stdout.write("E.G. python sync.py --project=1234 --path=~/Desktop/language_files --exclude=en-US, --base=en_US\n")
         sys.exit(2)
-
+        
     for opt, arg in opts:
         if opt == "--project":
             project_id = arg
@@ -149,10 +150,10 @@ if __name__ == "__main__":
 
     # Error if no project ID given
     if not project_id:
-        print("Please specify a project id using --project=project_id")
+        sys.stdout.write("Please specify a project id using --project=project_id\n")
         sys.exit(2)
-    print("Initializing")
-    tool = sync(api_key,
+    sys.stdout.write("Initializing\n")
+    tool = Sync(api_key,
                 api_secret,
                 file_path,
                 project_id,
@@ -160,7 +161,7 @@ if __name__ == "__main__":
                 exclude=exclude,
                 keep=keep,
                 rename=rename)
-    print("Downloading files")
+    sys.stdout.write("Downloading files\n")
     threads = []
     for lang in tool.langs:
         thread = Downloader(lang, tool)
@@ -171,5 +172,9 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
 
-    print("Language files downloaded. Quitting app")
+    sys.stdout.write("Language files successfully downloaded. Closing\n")
     sys.exit()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

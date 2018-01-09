@@ -5,7 +5,7 @@ import os
 import requests
 import sys
 
-from authentication import authentication_details, base_encode, base_decode
+from onesky_sync.authentication import authentication_details, base_encode, base_decode
 
 
 class Uploader(object):
@@ -22,34 +22,32 @@ class Uploader(object):
         self.file_type = file_type
 
     def upload(self):
-        print("Compiling data to upload")
+        sys.stdout.write("Compiling data to upload\n")
         url = "https://platform.api.onesky.io/1/projects/{0}/files".format(self.project)
-        print("Attempting to upload file located at {0}".format(file_path))
+        print("Attempting to upload file located at {0}".format(self.filepath))
         try:
-            files = {'file': open(file_path, 'rb')}
-            payload = authentication_details(api_key, api_secret)
+            files = {'file': open(self.filepath, 'rb')}
+            payload = authentication_details(self.api_key, self.api_secret)
             payload['file_format'] = self.file_type
-            payload['locale'] = base
+            payload['locale'] = self.base
             payload["is_keeping_all_strings"] = self.keep
             payload["is_keeping_all_strings"] = "false"
 
-            print("Data compiled... uploading!")
+            sys.stdout.write("Data compiled... uploading!\n")
             res = requests.post(url, files=files, params=payload)
             if res.json()['meta']['status'] == 201:
-                print("Succesfully uploaded!")
+                sys.stdout.write("Succesfully uploaded!\n")
             else:
-                print("Something went wrong...")
+                sys.stdout.write("Something went wrong...\n")
                 print(json.dumps(res.json(), indent=4))
 
             return
         except FileNotFoundError:
-            print("No file located at {0} - Please give a valid file path".format(file_path))
+            print("No file located at {0} - Please give a valid file path".format(self.filepath))
             sys.exit(2)
 
 
-if __name__ == "__main__":
-    print("Starting up")
-    # Set some defaults, prevent errors
+def main(parameters):
     file_path = "language_files"
     base = "en_US"
     keep = "false"
@@ -57,11 +55,11 @@ if __name__ == "__main__":
     project_id = ''
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["path=", "project=", "format=", "keep=", "base="])
+        opts, args = getopt.getopt(parameters, "", ["path=", "project=", "format=", "keep=", "base="])
     except getopt.GetoptError:
         print(getopt.GetoptError)
-        print("Usage: python upload.py --project=project_id --path=<dir>[--format= --base= --keep=False]")
-        print("E.G. python upload.py --project=1234 --path=~/Desktop/language_files, --base=en_US")
+        sys.stdout.write("Usage: python upload.py --project=project_id --path=<dir>[--format= --base= --keep=False]\n")
+        sys.stdout.write("E.G. python upload.py --project=1234 --path=~/Desktop/language_files, --base=en_US\n")
         sys.exit(2)
 
     for opt, arg in opts:
@@ -91,10 +89,14 @@ if __name__ == "__main__":
 
     # Error if no project ID given
     if not project_id:
-        print("Please specify a project id using --project=project_id")
+        sys.stdout.write("Please specify a project id using --project=project_id\n")
         sys.exit(2)
 
     tool = Uploader(api_key, api_secret, file_path, project_id, file_type, base, keep)
     tool.upload()
-    print("Done!")
+    sys.stdout.write("Successfully uploaded file to OneSky!\n")
     sys.exit()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
