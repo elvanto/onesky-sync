@@ -8,7 +8,7 @@ import sys
 import threading
 import time
 
-from onesky_sync.authentication import authentication_details, base_decode, base_encode
+from onesky_sync.authentication import authentication_details, get_auth
 
 
 class Sync(object):
@@ -112,9 +112,10 @@ def main(parameters):
     keep = False
     rename = False
     project_id = ''
+    auth_file = "auth.txt"
 
     try:
-        opts, args = getopt.getopt(parameters, "", ["path=", "project=", "exclude=", "keep=", "base=", "rename="])
+        opts, args = getopt.getopt(parameters, "", ["path=", "project=", "exclude=", "keep=", "base=", "rename=", "auth="])
     except getopt.GetoptError:
         sys.stdout.write(getopt.GetoptError)
         sys.stdout.write("Usage: python sync.py --project=project_id [--path=<dir> --exclude=lang_code --base= --keep=False --rename=True\n")
@@ -136,17 +137,10 @@ def main(parameters):
             base = arg
         elif opt == "--rename":
             rename = arg
+        elif opt== "--auth":
+            auth_file = arg
 
-    try:
-        with open("auth.txt") as file:
-            reader = file.readlines()
-            api_key = base_decode(reader[0])
-            api_secret = base_decode(reader[1])
-    except IOError:
-        api_key = input("Please enter API Key: ")
-        api_secret = input("Please enter API Secret: ")
-        with open("auth.txt", "w+") as file:
-            file.writelines([base_encode(api_key), base_encode(api_secret)])
+    api_key, api_secret = get_auth(auth_file)
 
     # Error if no project ID given
     if not project_id:

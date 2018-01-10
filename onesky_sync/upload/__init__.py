@@ -5,7 +5,7 @@ import os
 import requests
 import sys
 
-from onesky_sync.authentication import authentication_details, base_encode, base_decode
+from onesky_sync.authentication import authentication_details, get_auth
 
 
 class Uploader(object):
@@ -53,9 +53,10 @@ def main(parameters):
     keep = "false"
     file_type = "GNU_PO"
     project_id = ''
+    auth_file = "auth.txt"
 
     try:
-        opts, args = getopt.getopt(parameters, "", ["path=", "project=", "format=", "keep=", "base="])
+        opts, args = getopt.getopt(parameters, "", ["path=", "project=", "format=", "keep=", "base=", "auth="])
     except getopt.GetoptError:
         print(getopt.GetoptError)
         sys.stdout.write("Usage: python upload.py --project=project_id --path=<dir>[--format= --base= --keep=False]\n")
@@ -75,17 +76,10 @@ def main(parameters):
             base = arg
         elif opt == "--format":
             file_type = arg
+        elif opt== "--auth":
+            auth_file = arg
 
-    try:
-        with open("auth.txt") as file:
-            reader = file.readlines()
-            api_key = base_decode(reader[0])
-            api_secret = base_decode(reader[1])
-    except IOError:
-        api_key = input("Please enter API Key: ")
-        api_secret = input("Please enter API Secret: ")
-        with open("auth.txt", "w+") as file:
-            file.writelines([base_encode(api_key), base_encode(api_secret)])
+    api_key, api_secret = get_auth(auth_file)
 
     # Error if no project ID given
     if not project_id:
