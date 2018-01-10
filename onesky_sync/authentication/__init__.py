@@ -27,6 +27,10 @@ def base_decode(string):
 
 
 def get_auth(auth_file):
+    
+    if auth_file.startswith('~'):
+        auth_file = os.path.expanduser(auth_file)
+
     try:
         with open(auth_file) as file:
             reader = file.readlines()
@@ -35,7 +39,7 @@ def get_auth(auth_file):
     except IOError:
         api_key = input("Please enter API Key: ")
         api_secret = input("Please enter API Secret: ")
-        with open("auth.txt", "w+") as file:
+        with open(auth_file, "w+") as file:
             file.writelines([base_encode(api_key), base_encode(api_secret)])
 
     return api_key, api_secret
