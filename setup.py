@@ -12,7 +12,7 @@ setup(
         'onesky_sync.authentication'
     ],
     author_email='support@elvanto.com',
-    version='2.0.0',
+    version='2.0.1',
     entry_points={
         'console_scripts': [
             'onesky-sync=onesky_sync.cli.main:main',

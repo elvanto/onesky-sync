@@ -4,14 +4,15 @@ from onesky_sync.upload import main as upload
 
 
 def main():
-    initial_error = 'Please enter a valid command:\n\t- upload\n\t- download\n\nUse "help" for more information\n'
+    initial_error = 'Please enter a valid command:\n\t- upload\n\t- download\n\nUse "help" for more information'
     try:
         command = sys.argv[1].lower()
         if command not in ['upload', 'download', 'help']:
-            sys.stdout.write(initial_error)
+            print(initial_error)
             sys.exit(2)
     except IndexError:
-        sys.stdout.write(initial_error)
+        print(initial_error)
+        sys.exit(2)
 
     if command == 'help':
         pass

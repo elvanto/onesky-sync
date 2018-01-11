@@ -22,7 +22,7 @@ class Uploader(object):
         self.file_type = file_type
 
     def upload(self):
-        sys.stdout.write("Compiling data to upload\n")
+        print("Compiling data to upload")
         url = "https://platform.api.onesky.io/1/projects/{0}/files".format(self.project)
         print("Attempting to upload file located at {0}".format(self.filepath))
         try:
@@ -33,12 +33,12 @@ class Uploader(object):
             payload["is_keeping_all_strings"] = self.keep
             payload["is_keeping_all_strings"] = "false"
 
-            sys.stdout.write("Data compiled... uploading!\n")
+            print("Data compiled... uploading!")
             res = requests.post(url, files=files, params=payload)
             if res.json()['meta']['status'] == 201:
-                sys.stdout.write("Succesfully uploaded!\n")
+                print("Succesfully uploaded!")
             else:
-                sys.stdout.write("Something went wrong...\n")
+                print("Something went wrong...")
                 print(json.dumps(res.json(), indent=4))
 
             return
@@ -59,8 +59,8 @@ def main(parameters):
         opts, args = getopt.getopt(parameters, "", ["path=", "project=", "format=", "keep=", "base=", "auth="])
     except getopt.GetoptError:
         print(getopt.GetoptError)
-        sys.stdout.write("Usage: python upload.py --project=project_id --path=<dir>[--format= --base= --keep=False]\n")
-        sys.stdout.write("E.G. python upload.py --project=1234 --path=~/Desktop/language_files, --base=en_US\n")
+        print("Usage: python upload.py --project=project_id --path=<dir>[--format= --base= --keep=False]")
+        print("E.G. python upload.py --project=1234 --path=~/Desktop/language_files, --base=en_US")
         sys.exit(2)
 
     for opt, arg in opts:
@@ -83,12 +83,12 @@ def main(parameters):
 
     # Error if no project ID given
     if not project_id:
-        sys.stdout.write("Please specify a project id using --project=project_id\n")
+        print("Please specify a project id using --project=project_id")
         sys.exit(2)
 
     tool = Uploader(api_key, api_secret, file_path, project_id, file_type, base, keep)
     tool.upload()
-    sys.stdout.write("Successfully uploaded file to OneSky!\n")
+    print("Successfully uploaded file to OneSky!")
     sys.exit()
 
 
