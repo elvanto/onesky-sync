@@ -75,16 +75,18 @@ class JsonDownloader(threading.Thread):
             params[key] = auth[key]
 
         data = requests.get(url, params=params).content.decode()
+        if data:
+            if self.sync.rename:
+                json_path = "{}/{}.json".format(self.sync.filepath, self.lang.replace("-", "_"))
+            else:
+                json_path = "{}/{}.json".format(self.sync.filepath, self.lang)
 
-        if self.sync.rename:
-            json_path = "{}/{}.json".format(self.sync.filepath, self.lang.replace("-", "_"))
+            with open(json_path, "w+") as new_json_file:
+                new_json_file.write(data)
+
+            print("{}.json downloaded and saved to {}".format(self.lang, json_path))
         else:
-            json_path = "{}/{}.json".format(self.sync.filepath, self.lang)
-
-        with open(json_path, "w+") as new_json_file:
-            new_json_file.write(data)
-
-        print("{}.json downloaded and saved to {}".format(self.lang, json_path))
+            print("{}.json not downloaded - No data to download".format(self.lang))
 
         return
 
