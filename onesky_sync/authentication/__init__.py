@@ -1,5 +1,6 @@
 import codecs
 import hashlib
+import os
 import time
 
 
@@ -27,7 +28,6 @@ def base_decode(string):
 
 
 def get_auth(auth_file):
-    
     if auth_file.startswith('~'):
         auth_file = os.path.expanduser(auth_file)
 

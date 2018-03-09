@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import getopt
 import os
-import requests
 import sys
 import threading
 import time
+
+import requests
 
 from onesky_sync.authentication import authentication_details, get_auth
 
@@ -13,6 +14,7 @@ class JsonSync(object):
     """
     The object to store important stuff.
     """
+
     def __init__(self, api_key, api_secret, filepath, project, rename=False, base="en-US", exclude=[]):
         self.api_key = api_key
         self.api_secret = api_secret
@@ -67,7 +69,7 @@ class JsonDownloader(threading.Thread):
 
         auth = authentication_details(self.sync.api_key, self.sync.api_secret)
         params = {
-            "source_file_name":"{}.json".format(self.sync.base),
+            "source_file_name": "{}.json".format(self.sync.base),
             "locale": self.lang,
             "export_file_name": "{}.json".format(self.lang)
         }
@@ -89,6 +91,7 @@ class JsonDownloader(threading.Thread):
             print("{}.json not downloaded - No data to download".format(self.lang))
 
         return
+
 
 def main(parameters):
     print("Downloading Files from OneSky")
@@ -134,12 +137,12 @@ def main(parameters):
         sys.exit(2)
     print("Initializing")
     tool = JsonSync(api_key,
-                api_secret,
-                file_path,
-                project_id,
-                base=base,
-                exclude=exclude,
-                rename=rename)
+                    api_secret,
+                    file_path,
+                    project_id,
+                    base=base,
+                    exclude=exclude,
+                    rename=rename)
     print("Downloading files")
     threads = []
     for lang in tool.langs:
@@ -153,6 +156,7 @@ def main(parameters):
 
     print("Language files successfully downloaded. Closing")
     sys.exit()
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
