@@ -6,10 +6,11 @@ setup(
     author='Elvanto',
     packages=[
         'onesky_sync',
+        'onesky_sync.authentication',
         'onesky_sync.cli',
+        'onesky_sync.json_sync',
         'onesky_sync.sync',
         'onesky_sync.upload',
-        'onesky_sync.authentication'
     ],
     author_email='support@elvanto.com',
     version='2.0.1',
