@@ -13,7 +13,7 @@ setup(
         'onesky_sync.upload',
     ],
     author_email='support@elvanto.com',
-    version='2.0.1',
+    version='2.0.2',
     entry_points={
         'console_scripts': [
             'onesky-sync=onesky_sync.cli.main:main',
