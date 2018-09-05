@@ -37,6 +37,12 @@ class Sync(object):
         url = "https://platform.api.onesky.io/1/projects/{}/languages".format(self.project)
         data = requests.get(url, params=authentication_details(self.api_key, self.api_secret)).json()
         langs = []
+
+        if "error" in data.keys():
+            print('Error from OneSky:')
+            print(data["error"])
+            sys.exit(1)
+
         for lang in data["data"]:
             langs.append(lang["code"])
         if self.exclude:
