@@ -86,11 +86,6 @@ class Downloader(threading.Thread):
 
         data = requests.get(url, params=params).content.decode()
 
-        if "error" in data.keys():
-            print('Error from OneSky:')
-            print(data["error"])
-            sys.exit(1)
-
         if self.sync.rename:
             po_path = "{}/{}.po".format(self.sync.langpath, self.lang.replace("-", "_"))
             mo_path = "{}/{}.mo".format(self.sync.filepath, self.lang.replace("-","_"))
