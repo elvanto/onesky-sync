@@ -35,11 +35,14 @@ class Uploader(object):
 
             print("Data compiled... uploading!")
             res = requests.post(url, files=files, params=payload)
-            if res.json()['meta']['status'] == 201:
-                print("Succesfully uploaded!")
+            response_json = res.json()
+            print("OneSky API Response:")
+            print(json.dumps(response_json, indent=4))
+            
+            if res.status_code == 201 and response_json.get('meta', {}).get('status') == 201:
+                print("Successfully uploaded!")
             else:
-                print("Something went wrong...")
-                print(json.dumps(res.json(), indent=4))
+                print("Upload failed with status code:", res.status_code)
 
             return
         except FileNotFoundError:

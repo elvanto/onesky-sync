@@ -1,7 +1,20 @@
-auth.txt
-.idea/
+# Python
 *.pyc
 venv/
 build/
 dist/
 OneSky_Sync.egg-info/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Local configuration
+auth.txt
